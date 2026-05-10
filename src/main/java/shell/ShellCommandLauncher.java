@@ -19,6 +19,7 @@ public final class ShellCommandLauncher {
     private List<String> parameters;
     @Singular
     private Map<String, String> envs;
+    private byte[] stdin;
     private File cwd;
 
     public ExecutionResults launch() throws ShellException {
@@ -32,6 +33,7 @@ public final class ShellCommandLauncher {
                 .parameter("--")
                 .parameter(command);
         }
+        builder.stdin(stdin);
         parameters.forEach(builder::parameter);
         builder.envs(envs).cwd(cwd);
         return builder.build().launch();

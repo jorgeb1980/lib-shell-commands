@@ -25,6 +25,7 @@ public final class CommandLauncher {
     private List<String> parameters;
     @Singular
     private Map<String, String> envs;
+    private byte[] stdin;
     private File cwd;
 
     private String buildString(byte[] content) {
@@ -46,6 +47,7 @@ public final class CommandLauncher {
                     throw new ShellException(format("%s is not a directory", cwd));
                 }
             }
+            if (stdin != null) { pb.redirectInput(ProcessBuilder.Redirect.PIPE); }
             pb.directory(cwd);
             if (envs != null && !envs.isEmpty()) {
                 var environment = pb.environment();
@@ -58,6 +60,14 @@ public final class CommandLauncher {
             outputGobbler.start();
             var errorGobbler = new StreamGobbler(p.getErrorStream(), errorOutputStream);
             errorGobbler.start();
+            if (stdin != null) {
+                p.getOutputStream().write(stdin);
+                try {
+                    p.getOutputStream().close();
+                } catch (IOException e) {
+                    throw new ShellException(e);
+                }
+            }
 
             var exitCode = p.waitFor();
             outputGobbler.waitFor();
