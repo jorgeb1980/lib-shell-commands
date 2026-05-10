@@ -8,6 +8,7 @@ import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -177,5 +178,48 @@ public class TestShellCommandLauncher {
     @Test
     public void testUnixLikeEnvVars() {
         testEnvVariables("env");
+    }
+
+    @EnabledOnOs({OS.WINDOWS})
+    @Test
+    public void redirectStdinWindows() {
+        var someText =
+                """
+                lalala
+                lolololo
+                lerelelele
+                """;
+
+        try {
+            var result = ShellCommandLauncher.builder().
+                    command("find").
+                    parameter("/c").parameter("/v").parameter("\"\"").
+                    stdin(someText.getBytes(StandardCharsets.ISO_8859_1)).build().launch();
+            assertEquals(0, result.getExitCode());
+            assertEquals("3", result.getStandardOutput().trim());
+        } catch (ShellException e) {
+            fail(e);
+        }
+    }
+
+    @DisabledOnOs({OS.WINDOWS})
+    @Test
+    public void redirectStdinUnixLike() {
+        var someText =
+                """
+                some
+                text
+                """;
+
+        try {
+            var result = ShellCommandLauncher.builder().
+                    command("wc").
+                    parameter("-l").
+                    stdin(someText.getBytes(StandardCharsets.UTF_8)).build().launch();
+            assertEquals(0, result.getExitCode());
+            assertEquals("2", result.getStandardOutput().trim());
+        } catch (ShellException e) {
+            fail(e);
+        }
     }
 }
