@@ -21,15 +21,15 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '21.0.1+12.0.LTS'
+        java-version: '25'
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
     - name: Setup Maven Action
       uses: s4u/setup-maven-action@v1.11.0
       with:
-        java-version: 21
-        maven-version: 3.9.6
+        java-version: 25
+        maven-version: 3.9.16
 
     - name: Build with Maven
       run: mvn -B package --file pom.xml
